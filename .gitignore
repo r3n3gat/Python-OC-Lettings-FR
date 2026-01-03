@@ -1,3 +1,25 @@
-**/__pycache__
+**/__pycache__/
 *.pyc
-venv
+
+# Virtual env
+venv/
+.venv/
+
+# Env vars / secrets
+.env
+.env.*
+
+# Coverage outputs (mais PAS le fichier de config si tu en as un)
+.coverage
+htmlcov/
+
+# Reports
+flake8_report.txt
+
+# Local DB parasite (on garde oc-lettings-site.sqlite3 si le projet le fournit)
+db.sqlite3
+db.sqlite3-*
+
+
+staticfiles/
+*.sqlite3

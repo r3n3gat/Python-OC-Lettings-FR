@@ -1,9 +1,14 @@
 import os
 import sys
 
+from dotenv import load_dotenv
+
 
 def main():
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'oc_lettings_site.settings')
+    # Charge le fichier .env situé à côté de manage.py (silencieux s'il n'existe pas)
+    load_dotenv(os.path.join(os.path.dirname(__file__), ".env"))
+
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "oc_lettings_site.settings")
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:
@@ -15,5 +20,5 @@ def main():
     execute_from_command_line(sys.argv)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
