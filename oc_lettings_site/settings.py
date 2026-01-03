@@ -5,13 +5,16 @@ import logging
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # SECURITY WARNING: keep the secret key used in production secret!
-# Mets ta valeur actuelle si tu préfères. Sinon, utilise une variable d'env.
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "CHANGE_ME_IN_PROD")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DJANGO_DEBUG", "True").lower() == "true"
 
-ALLOWED_HOSTS = [h for h in os.getenv("DJANGO_ALLOWED_HOSTS", "").split(",") if h] if not DEBUG else []
+ALLOWED_HOSTS = (
+    [h for h in os.getenv("DJANGO_ALLOWED_HOSTS", "").split(",") if h]
+    if not DEBUG
+    else []
+)
 
 # Application definition
 INSTALLED_APPS = [
@@ -57,11 +60,9 @@ TEMPLATES = [
 WSGI_APPLICATION = "oc_lettings_site.wsgi.application"
 
 # Database
-# IMPORTANT (Django 3.0): NAME doit être une STRING, pas un Pathlib Path.
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        # On revient au nom historique du projet (évite une base vide db.sqlite3)
         "NAME": os.path.join(BASE_DIR, "oc-lettings-site.sqlite3"),
     }
 }
@@ -78,12 +79,16 @@ AUTH_PASSWORD_VALIDATORS = [
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "UTC"
 USE_I18N = True
-USE_L10N = True
 USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
+
+# Fix warnings W042 (choix du type de PK auto)
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+# Si tu veux rester “100% int” sans bigint :
+# DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 
 # Logging (console). Sentry branché via LoggingIntegration (plus bas).
 LOGGING = {
@@ -99,17 +104,13 @@ LOGGING = {
 }
 
 # -----------------------
-# SENTRY (Étape 3)
+# SENTRY
 # -----------------------
 SENTRY_ENABLE = os.getenv("SENTRY_ENABLE", "true").lower() == "true"
 SENTRY_DSN = os.getenv("SENTRY_DSN", "").strip()
 SENTRY_ENVIRONMENT = os.getenv("SENTRY_ENVIRONMENT", "local").strip()
 SENTRY_TRACES_SAMPLE_RATE = float(os.getenv("SENTRY_TRACES_SAMPLE_RATE", "0.0"))
-
-# ⚠️ En Europe, "send_default_pii=True" = données perso (IP, etc.). Mets True seulement si tu sais pourquoi.
 SENTRY_SEND_DEFAULT_PII = os.getenv("SENTRY_SEND_DEFAULT_PII", "false").lower() == "true"
-
-# Optionnel mais très utile (CI/CD) : permet de relier les erreurs à un commit/version
 SENTRY_RELEASE = os.getenv("SENTRY_RELEASE", "").strip() or None
 
 if SENTRY_ENABLE and SENTRY_DSN:
@@ -118,8 +119,8 @@ if SENTRY_ENABLE and SENTRY_DSN:
     from sentry_sdk.integrations.logging import LoggingIntegration
 
     sentry_logging = LoggingIntegration(
-        level=logging.INFO,        # breadcrumbs (infos)
-        event_level=logging.ERROR, # events envoyés à Sentry (logs ERROR+)
+        level=logging.INFO,         # breadcrumbs
+        event_level=logging.ERROR,  # events envoyés à Sentry
     )
 
     sentry_sdk.init(
