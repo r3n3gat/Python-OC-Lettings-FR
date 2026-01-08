@@ -22,6 +22,5 @@ db.sqlite3-*
 
 
 staticfiles/
-*.sqlite3
-
-oc-lettings-site.sqlite3
+db.sqlite3
+db.sqlite3-*

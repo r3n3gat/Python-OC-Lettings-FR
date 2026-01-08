@@ -1,22 +1,21 @@
 import os
 import logging
+from pathlib import Path
 
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = Path(__file__).resolve().parent.parent
 
-# SECURITY WARNING: keep the secret key used in production secret!
+# -----------------------
+# SECURITY
+# -----------------------
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "CHANGE_ME_IN_PROD")
+DEBUG = os.getenv("DJANGO_DEBUG", "false").lower() == "true"
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv("DJANGO_DEBUG", "True").lower() == "true"
+# ALLOWED_HOSTS dynamique (Docker-friendly)
+ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "*").split(",")
 
-ALLOWED_HOSTS = (
-    [h for h in os.getenv("DJANGO_ALLOWED_HOSTS", "").split(",") if h]
-    if not DEBUG
-    else []
-)
-
-# Application definition
+# -----------------------
+# APPLICATIONS
+# -----------------------
 INSTALLED_APPS = [
     "oc_lettings_site",
     "lettings",
@@ -31,6 +30,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -44,7 +44,7 @@ ROOT_URLCONF = "oc_lettings_site.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [os.path.join(BASE_DIR, "templates")],
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -59,15 +59,19 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "oc_lettings_site.wsgi.application"
 
-# Database
+# -----------------------
+# DATABASE
+# -----------------------
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": os.path.join(BASE_DIR, "oc-lettings-site.sqlite3"),
+        "NAME": BASE_DIR / "oc-lettings-site.sqlite3",
     }
 }
 
-# Password validation
+# -----------------------
+# PASSWORD VALIDATION
+# -----------------------
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
@@ -75,22 +79,28 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
-# Internationalization
+# -----------------------
+# INTERNATIONALIZATION
+# -----------------------
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "UTC"
 USE_I18N = True
 USE_TZ = True
 
-# Static files (CSS, JavaScript, Images)
+# -----------------------
+# STATIC FILES
+# -----------------------
 STATIC_URL = "/static/"
-STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
 
-# Fix warnings W042 (choix du type de PK auto)
-DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-# Si tu veux rester “100% int” sans bigint :
-# DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
+# Dossier pour collectstatic (servi par Gunicorn)
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
-# Logging (console). Sentry branché via LoggingIntegration (plus bas).
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
+
+# -----------------------
+# LOGGING
+# -----------------------
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -106,12 +116,12 @@ LOGGING = {
 # -----------------------
 # SENTRY
 # -----------------------
-SENTRY_ENABLE = os.getenv("SENTRY_ENABLE", "true").lower() == "true"
+SENTRY_ENABLE = os.getenv("SENTRY_ENABLE", "false").lower() == "true"
 SENTRY_DSN = os.getenv("SENTRY_DSN", "").strip()
-SENTRY_ENVIRONMENT = os.getenv("SENTRY_ENVIRONMENT", "local").strip()
+SENTRY_ENVIRONMENT = os.getenv("SENTRY_ENVIRONMENT", "local")
 SENTRY_TRACES_SAMPLE_RATE = float(os.getenv("SENTRY_TRACES_SAMPLE_RATE", "0.0"))
 SENTRY_SEND_DEFAULT_PII = os.getenv("SENTRY_SEND_DEFAULT_PII", "false").lower() == "true"
-SENTRY_RELEASE = os.getenv("SENTRY_RELEASE", "").strip() or None
+SENTRY_RELEASE = os.getenv("SENTRY_RELEASE", None)
 
 if SENTRY_ENABLE and SENTRY_DSN:
     import sentry_sdk
@@ -119,8 +129,8 @@ if SENTRY_ENABLE and SENTRY_DSN:
     from sentry_sdk.integrations.logging import LoggingIntegration
 
     sentry_logging = LoggingIntegration(
-        level=logging.INFO,         # breadcrumbs
-        event_level=logging.ERROR,  # events envoyés à Sentry
+        level=logging.INFO,
+        event_level=logging.ERROR,
     )
 
     sentry_sdk.init(
