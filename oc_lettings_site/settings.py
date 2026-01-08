@@ -1,6 +1,8 @@
 import os
 import logging
 from pathlib import Path
+import dj_database_url
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -63,10 +65,9 @@ WSGI_APPLICATION = "oc_lettings_site.wsgi.application"
 # DATABASE
 # -----------------------
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "oc-lettings-site.sqlite3",
-    }
+    "default": dj_database_url.config(
+        default=f"sqlite:///{BASE_DIR / 'oc-lettings-site.sqlite3'}"
+    )
 }
 
 # -----------------------
