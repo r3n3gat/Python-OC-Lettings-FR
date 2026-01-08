@@ -19,12 +19,6 @@ RUN python manage.py collectstatic --noinput
 
 EXPOSE 8000
 
-# Apply migrations
-RUN python manage.py migrate --noinput
-
-# Seed database if enabled
-RUN if [ "$RUN_SEED" = "true" ] ; then python manage.py seed_data ; fi
-
-# Start server
-CMD gunicorn oc_lettings_site.wsgi:application --bind 0.0.0.0:$PORT --workers 3
-
+CMD python manage.py migrate --noinput && \
+    if [ "$RUN_SEED" = "true" ] ; then python manage.py seed_data ; fi && \
+    gunicorn oc_lettings_site.wsgi:application --bind 0.0.0.0:$PORT --workers 3
