@@ -1,7 +1,9 @@
+from django.contrib.auth.models import User
 from django.core.management.base import BaseCommand
+
 from lettings.models import Address, Letting
 from profiles.models import Profile
-from django.contrib.auth.models import User
+
 
 class Command(BaseCommand):
     help = "Seed database with initial OC Lettings data"
@@ -68,7 +70,7 @@ class Command(BaseCommand):
                 city=city,
                 state=state,
                 zip_code=zip_code,
-                country_iso_code=country
+                country_iso_code=country,
             )
             addresses.append(addr)
 
