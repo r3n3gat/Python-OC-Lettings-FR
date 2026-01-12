@@ -34,9 +34,9 @@ jobs:
 
       - name: Tests + Coverage (fail-under 80)
         run: |
-          coverage erase
-          coverage run manage.py test
-          coverage report -m --fail-under=80
+          python -m coverage erase
+          python -m coverage run manage.py test
+          python -m coverage report -m --fail-under=80
 
   docker:
     runs-on: ubuntu-latest
