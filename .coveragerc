@@ -6,18 +6,20 @@ source =
     profiles
 omit =
     */migrations/*
-    */tests.py
     */tests/*
-    */.venv/*
-    */venv/*
     manage.py
-    oc_lettings_site/asgi.py
-    oc_lettings_site/wsgi.py
+    */asgi.py
+    */wsgi.py
+
+    # Django config / glue code (non pertinent à tester ici)
+    oc_lettings_site/settings.py
+    oc_lettings_site/urls.py
+
+    # Commandes utilitaires / debug
+    oc_lettings_site/management/*
+    oc_lettings_site/sentry_debug.py
 
 [report]
 show_missing = True
 skip_covered = True
 fail_under = 80
-exclude_lines =
-    pragma: no cover
-    if __name__ == .__main__.:
